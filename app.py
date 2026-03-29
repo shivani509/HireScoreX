@@ -1,3 +1,4 @@
+from flask_login import current_user
 import os
 import re
 import json
