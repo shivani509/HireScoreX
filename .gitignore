@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+instance/
+uploads/*
+!uploads/.gitkeep
+reports/*.pdf
+hirescorex.db
+.pytest_cache/
+.DS_Store

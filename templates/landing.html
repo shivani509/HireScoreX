@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}HireScoreX · AI Hiring Intelligence{% endblock %}
+{% block content %}
+<section class="hero-grid">
+  <div class="hero-copy card soft-gradient">
+    
+    <h1>Turn resumes into <span>ATS-ready</span>, interview-ready applications.</h1>
+    <p>Analyze resume-job fit, uncover missing skills, generate role-focused keywords, and create downloadable reports in one polished platform.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{{ url_for('register') }}">Create Account</a>
+      <a class="btn btn-soft" href="{{ url_for('login') }}">Sign In</a>
+    </div>
+    <div class="mini-stats">
+      <div><strong>PDF / DOCX</strong><span>Real parsing</span></div>
+      <div><strong>Role-aware</strong><span>Smart scoring</span></div>
+      <div><strong>Recruiter View</strong><span>Filters + ranking</span></div>
+    </div>
+  </div>
+  <div class="hero-preview card">
+    <div class="preview-header">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="preview-badge">Live product preview</div>
+    </div>
+    <div class="preview-scores">
+      <div class="score-card indigo"><h3>84%</h3><p>Resume Match</p></div>
+      <div class="score-card teal"><h3>11</h3><p>Matched Skills</p></div>
+      <div class="score-card coral"><h3>6</h3><p>Missing Keywords</p></div>
+    </div>
+    <div class="preview-panel">
+      <h4>Why recruiters like this</h4>
+      <ul>
+        <li>section-wise scoring</li>
+        <li>practical keyword suggestions</li>
+        <li>AI summary and interview questions</li>
+        <li>downloadable polished reports</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      SECRET_KEY: change-me
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/hirescorex
+      OPENAI_MODEL: gpt-4.1-mini
+    depends_on:
+      - db
+    volumes:
+      - ./:/app
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hirescorex
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

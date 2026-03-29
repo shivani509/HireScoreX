@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Analysis Result · HireScoreX{% endblock %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>{{ analysis.role_title }}</h1>
+    <p class="muted">{{ analysis.company_name or 'Target company not specified' }} · {{ analysis.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+  </div>
+  <div class="hero-actions">
+    <span class="pill {{ fit_tone }}">{{ fit_label }}</span>
+    <span class="pill indigo">Top {{ percentile }}th percentile</span>
+    <a class="btn btn-soft" href="{{ url_for('api_analysis_detail', analysis_id=analysis.id) }}">Open JSON</a>
+    <a class="btn btn-primary" href="{{ url_for('report', analysis_id=analysis.id) }}">Download Report</a>
+  </div>
+</section>
+
+<section class="result-hero upgraded-result-hero">
+  <article class="card score-hero score-ring-card">
+    <span>Overall Match</span>
+    <div class="score-ring" style="--score: {{ analysis.score_overall }}">
+      <div>
+        <strong>{{ analysis.score_overall }}%</strong>
+        <small>{{ fit_label }}</small>
+      </div>
+    </div>
+    <p>Role-aware fit score based on skills, projects, education, experience, and keyword overlap.</p>
+  </article>
+  <article class="card score-grid-panel">
+    <div class="card-head"><h2>Section-wise Performance</h2><p class="muted">Where your resume is strong and where it needs work</p></div>
+    <div class="progress-list">
+      <div><label>Skills</label><div class="progress"><span style="width: {{ analysis.score_skills }}%"></span></div><strong>{{ analysis.score_skills }}%</strong></div>
+      <div><label>Experience</label><div class="progress"><span style="width: {{ analysis.score_experience }}%"></span></div><strong>{{ analysis.score_experience }}%</strong></div>
+      <div><label>Projects</label><div class="progress"><span style="width: {{ analysis.score_projects }}%"></span></div><strong>{{ analysis.score_projects }}%</strong></div>
+      <div><label>Education</label><div class="progress"><span style="width: {{ analysis.score_education }}%"></span></div><strong>{{ analysis.score_education }}%</strong></div>
+      <div><label>Keywords</label><div class="progress"><span style="width: {{ analysis.score_keywords }}%"></span></div><strong>{{ analysis.score_keywords }}%</strong></div>
+    </div>
+  </article>
+</section>
+
+<section class="dashboard-grid dashboard-grid-xl">
+  <article class="card">
+    <div class="card-head"><h2>Score Map</h2><p class="muted">Visual overview of all scoring buckets</p></div>
+    <canvas id="detailChart"></canvas>
+  </article>
+  <article class="card">
+    <div class="card-head"><h2>Improvement Snapshot</h2></div>
+    <ul class="clean-list">
+      {% for item in lists.suggestions[:4] %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  </article>
+</section>
+
+<section class="cards-3">
+  <article class="card">
+    <div class="card-head"><h2>Matched Skills</h2></div>
+    <div class="tag-wrap">{% for item in lists.matched_skills %}<span class="tag indigo">{{ item }}</span>{% else %}<span class="muted">No strong matches found.</span>{% endfor %}</div>
+  </article>
+  <article class="card">
+    <div class="card-head"><h2>Missing Keywords</h2></div>
+    <div class="tag-wrap">{% for item in lists.missing_skills %}<span class="tag coral">{{ item }}</span>{% else %}<span class="muted">No major keyword gaps.</span>{% endfor %}</div>
+  </article>
+  <article class="card">
+    <div class="card-head"><h2>Suggestions</h2></div>
+    <ul class="clean-list">{% for item in lists.suggestions %}<li>{{ item }}</li>{% endfor %}</ul>
+  </article>
+</section>
+
+<section class="dashboard-grid">
+  <article class="card">
+    <div class="card-head"><h2>Strengths</h2></div>
+    <ul class="clean-list">{% for item in lists.strong_points %}<li>{{ item }}</li>{% else %}<li>Build more role-focused content in resume.</li>{% endfor %}</ul>
+  </article>
+  <article class="card">
+    <div class="card-head"><h2>Weak Areas</h2></div>
+    <ul class="clean-list">{% for item in lists.weak_points %}<li>{{ item }}</li>{% else %}<li>No major weak areas highlighted.</li>{% endfor %}</ul>
+  </article>
+</section>
+
+<section class="cards-2">
+  <article class="card">
+    <div class="card-head"><h2>Readiness Checklist</h2><p class="muted">Quick pre-application validation</p></div>
+    <ul class="check-list">
+      {% for item in checklist %}
+      <li class="{{ 'done' if item.done else 'todo' }}">
+        <span class="check-dot">{{ '✓' if item.done else '•' }}</span>
+        <span>{{ item.label }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </article>
+  <article class="card">
+    <div class="card-head"><h2>Recruiter View</h2></div>
+    <div class="score-grid-mini">
+      <div><span>Fit Index</span><strong>{{ (analysis.score_overall * 0.55 + analysis.score_skills * 0.2 + analysis.score_projects * 0.1 + analysis.score_experience * 0.1 + analysis.score_keywords * 0.05)|round(1) }}</strong></div>
+      <div><span>Percentile</span><strong>{{ percentile }}</strong></div>
+      <div><span>Category</span><strong>{{ analysis.role_title|lower|title }}</strong></div>
+      <div><span>Matched</span><strong>{{ lists.matched_skills|length }}</strong></div>
+      <div><span>Missing</span><strong>{{ lists.missing_skills|length }}</strong></div>
+    </div>
+  </article>
+</section>
+
+<section class="cards-2">
+  <article class="card">
+    <div class="card-head"><h2>AI Summary</h2></div>
+    <div class="ai-summary">{{ analysis.ai_summary|replace('
+','<br>')|safe }}</div>
+  </article>
+  <article class="card">
+    <div class="card-head"><h2>Interview Questions</h2></div>
+    <ol class="clean-list">{% for item in lists.interview_questions %}<li>{{ item }}</li>{% endfor %}</ol>
+  </article>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const detailCtx = document.getElementById('detailChart');
+if (detailCtx) {
+  new Chart(detailCtx, {
+    type: 'radar',
+    data: { labels: {{ score_labels|tojson }}, datasets: [{ data: {{ score_series|tojson }}, borderWidth: 2 }] },
+    options: { scales: { r: { suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } }
+  });
+}
+</script>
+{% endblock %}

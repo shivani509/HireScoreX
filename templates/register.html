@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Register · HireScoreX{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block chrome %}
+<div class="auth-page-shell">
+  <section class="auth-split auth-login-layout">
+    <div class="auth-visual auth-office-bg register-visual">
+      <div class="auth-visual-overlay"></div>
+      <div class="auth-grid-dots auth-grid-dots-top"></div>
+      <div class="auth-grid-dots auth-grid-dots-bottom"></div>
+      <div class="auth-visual-content auth-visual-content-left">
+        <div class="hero-logo-wrap floating-hero">
+          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="HireScoreX logo" class="hero-logo-main">
+        </div>
+        <h1>HIRESCORE AI</h1>
+        <p>Build an interview-ready, ATS-smart profile with premium workflows.</p>
+      </div>
+    </div>
+
+    <div class="auth-form-side">
+      <div class="auth-card auth-card-animate register-card">
+        <div class="auth-brand-mini">
+          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="HireScoreX logo">
+          <span>HireScore AI</span>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack auth-flash-stack">
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="auth-heading-block compact">
+          <h2>Create Account</h2>
+          <h3>Start using your HireScore AI workspace</h3>
+          <p>Create a candidate or recruiter profile to analyze resumes, track reports, and explore recruiter insights.</p>
+        </div>
+
+        <form class="auth-modern-form" method="post">
+          <div class="field-block">
+            <label>Full Name</label>
+            <input type="text" name="full_name" placeholder="Your full name" required>
+          </div>
+          <div class="field-block">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="name@company.com" required>
+          </div>
+          <div class="field-block">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Create a secure password" required>
+          </div>
+          <div class="field-block">
+            <label>Account Type</label>
+            <select name="role" required>
+              <option value="candidate">Candidate</option>
+              <option value="recruiter">Recruiter</option>
+            </select>
+          </div>
+          <button class="auth-submit" type="submit">Create Account <span>→</span></button>
+        </form>
+
+        <p class="auth-switch-text">Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

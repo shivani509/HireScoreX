@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}History · HireScoreX{% endblock %}
+{% block content %}
+<section class="section-head"><div><h1>Analysis History</h1><p class="muted">Filter previous analyses by role, company, and score to prepare faster.</p></div><span class="pill teal">Average {{ avg_score }}%</span></section>
+<form class="card recruiter-filters history-filters" method="get">
+  <input type="text" name="role" value="{{ role }}" placeholder="Role title">
+  <input type="text" name="company" value="{{ company }}" placeholder="Company name">
+  <input type="number" name="min_score" value="{{ min_score }}" placeholder="Minimum score">
+  <button class="btn btn-primary" type="submit">Apply Filters</button>
+</form>
+<section class="card table-wrap">
+<table>
+  <thead><tr><th>Role</th><th>Company</th><th>Fit</th><th>Score</th><th>Date</th><th>Report</th></tr></thead>
+  <tbody>
+    {% for item in analyses %}
+    <tr>
+      <td><a href="{{ url_for('analysis_detail', analysis_id=item.id) }}">{{ item.role_title }}</a></td>
+      <td>{{ item.company_name or '—' }}</td>
+      <td><span class="pill {{ 'teal' if item.score_overall >= 80 else 'indigo' if item.score_overall >= 65 else 'coral' }}">{{ 'Excellent Fit' if item.score_overall >= 85 else 'Strong Fit' if item.score_overall >= 72 else 'Moderate Fit' if item.score_overall >= 60 else 'Needs Work' }}</span></td>
+      <td><span class="score-badge">{{ item.score_overall }}%</span></td>
+      <td>{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+      <td><a href="{{ url_for('report', analysis_id=item.id) }}">Download</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">No history matched the current filters.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</section>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Login · HireScoreX{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block chrome %}
+<div class="auth-page-shell">
+  <section class="auth-split auth-login-layout">
+    <div class="auth-visual auth-office-bg">
+      <div class="auth-visual-overlay"></div>
+      <div class="auth-grid-dots auth-grid-dots-top"></div>
+      <div class="auth-grid-dots auth-grid-dots-bottom"></div>
+
+      <div class="auth-visual-content">
+        <div class="hero-logo-wrap floating-hero">
+          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="HireScoreX logo" class="hero-logo-main">
+        </div>
+        <h1>HIRESCORE AI</h1>
+        <p>Empower Your Workforce, Elevate Your Talent.</p>
+      </div>
+    </div>
+
+    <div class="auth-form-side">
+      <div class="auth-card auth-card-animate">
+        <div class="auth-card-glow"></div>
+        <div class="auth-brand-mini">
+          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="HireScoreX logo">
+          <span>HireScore AI</span>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack auth-flash-stack">
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="auth-heading-block">
+          <h2>Welcome Back</h2>
+          <h3>Log in to your HireScore AI account</h3>
+          <p>Access your dashboard to discover insights, train staff, and optimize skills.</p>
+        </div>
+
+        <form class="auth-modern-form" method="post">
+          <div class="field-block">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="name@company.com" required>
+          </div>
+
+          <div class="field-block">
+            <label>Password</label>
+            <div class="password-wrap">
+              <input id="password" type="password" name="password" placeholder="••••••••" required>
+              <button class="toggle-eye" type="button" onclick="togglePassword()" aria-label="Show password">
+                <svg id="eyeOpen" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 12C3.8 8.5 7.4 6 12 6C16.6 6 20.2 8.5 22 12C20.2 15.5 16.6 18 12 18C7.4 18 3.8 15.5 2 12Z" stroke="currentColor" stroke-width="1.8"/>
+                  <circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                <svg id="eyeClosed" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none">
+                  <path d="M3 3L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M10.7 10.9C10.3 11.3 10 11.9 10 12.5C10 13.9 11.1 15 12.5 15C13.1 15 13.7 14.7 14.1 14.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M5.5 8C4.1 9.1 2.9 10.6 2 12C3.8 15.5 7.4 18 12 18C13.8 18 15.4 17.6 16.8 16.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M9.1 6.2C10 6.1 11 6 12 6C16.6 6 20.2 8.5 22 12C21.2 13.5 20.2 14.7 19 15.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="auth-links-row">
+              <a href="#">Forgot password?</a>
+            </div>
+          </div>
+
+          <button class="auth-submit" type="submit">Log In <span>→</span></button>
+        </form>
+
+        <p class="auth-switch-text">Don’t have an account? <a href="{{ url_for('register') }}">Sign Up</a></p>
+
+        <div class="auth-divider"><span>Or log in with</span></div>
+
+        <div class="social-grid">
+          <button type="button" class="social-btn">
+            <span class="social-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#4285F4" d="M21.81 12.23c0-.72-.06-1.25-.19-1.8H12v3.41h5.65c-.11.85-.7 2.13-2 3l-.02.11 2.73 2.08.19.02c1.77-1.6 2.79-3.96 2.79-6.82Z"/>
+                <path fill="#34A853" d="M12 22c2.76 0 5.07-.89 6.76-2.42l-3.22-2.47c-.86.59-2.01 1-3.54 1-2.72 0-5.02-1.8-5.84-4.28l-.11.01-2.84 2.19-.04.1C4.9 19.99 8.13 22 12 22Z"/>
+                <path fill="#FBBC05" d="M6.16 13.83A5.96 5.96 0 0 1 5.82 12c0-.64.11-1.25.31-1.83l-.01-.12-2.87-2.22-.09.04A9.84 9.84 0 0 0 2 12c0 1.56.37 3.03 1.02 4.33l3.14-2.5Z"/>
+                <path fill="#EB4335" d="M12 5.89c1.93 0 3.23.82 3.97 1.5l2.9-2.77C17.06 2.94 14.76 2 12 2 8.13 2 4.9 4.01 3.16 7.87l2.97 2.3C6.98 7.69 9.28 5.89 12 5.89Z"/>
+              </svg>
+            </span>
+            Google
+          </button>
+          <button type="button" class="social-btn">
+            <span class="social-icon linkedin-badge">in</span>
+            LinkedIn
+          </button>
+          <button type="button" class="social-btn">
+            <span class="social-icon microsoft-badge"><i></i><i></i><i></i><i></i></span>
+            Microsoft
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePassword() {
+  const input = document.getElementById('password');
+  const open = document.getElementById('eyeOpen');
+  const closed = document.getElementById('eyeClosed');
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  open.style.display = isPassword ? 'none' : 'block';
+  closed.style.display = isPassword ? 'block' : 'none';
+}
+</script>
+{% endblock %}

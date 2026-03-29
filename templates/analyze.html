@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Analyze Resume · HireScoreX{% endblock %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>New Analysis</h1>
+    <p class="muted">Upload PDF, DOCX, or TXT resume and compare it against a job description.</p>
+  </div>
+</section>
+<form class="card form-grid" method="post" enctype="multipart/form-data">
+  <div class="field-group full">
+    <label>Target role</label>
+    <input type="text" name="role_title" placeholder="Software Engineer / Full Stack Developer" required>
+  </div>
+  <div class="field-group">
+    <label>Company name</label>
+    <input type="text" name="company_name" placeholder="Google / Amazon / Startup">
+  </div>
+  <div class="field-group">
+    <label>Resume file</label>
+    <input type="file" name="resume" accept=".pdf,.docx,.txt" required>
+  </div>
+  <div class="field-group full">
+    <label>Job description</label>
+    <textarea name="jd_text" rows="12" placeholder="Paste the complete job description here..." required></textarea>
+  </div>
+  <div class="full form-actions">
+    <button class="btn btn-primary" type="submit">Run Analysis</button>
+  </div>
+</form>
+{% endblock %}

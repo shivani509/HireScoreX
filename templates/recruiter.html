@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Recruiter Dashboard · HireScoreX{% endblock %}
+{% block content %}
+<section class="section-head"><div><h1>Recruiter Dashboard</h1><p class="muted">Search candidates by role, score, company, and skill keyword with ranking support.</p></div><div class="hero-actions"><a class="btn btn-soft" href="{{ url_for('recruiter_export_csv', role=role, company=company, min_score=min_score, skill=skill) }}">Export CSV</a></div></section>
+<section class="stats-grid recruiter-stats">
+  <article class="card stat-card"><span>Matched Candidates</span><h3>{{ overview.count }}</h3><small>Current filtered list</small></article>
+  <article class="card stat-card"><span>Top Score</span><h3>{{ overview.top_score }}%</h3><small>Highest overall fit</small></article>
+  <article class="card stat-card"><span>Average Score</span><h3>{{ overview.avg_fit }}%</h3><small>Across visible candidates</small></article>
+  <article class="card stat-card"><span>Ranking Mode</span><h3>Fit Index</h3><small>Composite prioritization view</small></article>
+</section>
+<form class="card recruiter-filters recruiter-filters-5" method="get">
+  <input type="text" name="role" value="{{ role }}" placeholder="Filter by role">
+  <input type="text" name="company" value="{{ company }}" placeholder="Filter by company">
+  <input type="number" name="min_score" value="{{ min_score }}" placeholder="Minimum score">
+  <input type="text" name="skill" value="{{ skill }}" placeholder="Skill e.g. react">
+  <button class="btn btn-primary" type="submit">Apply Filters</button>
+</form>
+<section class="card table-wrap">
+<table>
+  <thead><tr><th>Rank</th><th>Candidate</th><th>Role</th><th>Company</th><th>Overall</th><th>Fit Index</th><th>Status</th><th>Date</th><th></th></tr></thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td>#{{ row.rank }}</td>
+      <td>{{ row.analysis.user.full_name }}</td>
+      <td>{{ row.analysis.role_title }}</td>
+      <td>{{ row.analysis.company_name or '—' }}</td>
+      <td><span class="score-badge">{{ row.analysis.score_overall }}%</span></td>
+      <td><strong>{{ row.fit_index }}</strong></td>
+      <td><span class="pill {{ row.fit_tone }}">{{ row.fit_label }}</span></td>
+      <td>{{ row.analysis.created_at.strftime('%d %b %Y') }}</td>
+      <td><a href="{{ url_for('analysis_detail', analysis_id=row.analysis.id) }}">View</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9">No candidates matched the current filters.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</section>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard · HireScoreX{% endblock %}
+{% block content %}
+<section class="hero-dashboard card soft-gradient dashboard-hero">
+  <div>
+    <span class="eyebrow">Candidate Command Center</span>
+    <h1>Hello, {{ current_user.full_name.split(' ')[0] }}</h1>
+    <p class="muted">Track fit scores, hiring trends, missing skills, and recruiter-ready reports from one polished workspace.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{{ url_for('analyze') }}">Run New Analysis</a>
+      <a class="btn btn-soft" href="{{ url_for('history') }}">Open History</a>
+    </div>
+  </div>
+  <div class="hero-highlight">
+    <span class="pill {{ stats.fit_tone }}">{{ stats.fit_label }}</span>
+    <h3>{{ stats.avg }}%</h3>
+    <p>Average readiness across your saved analyses.</p>
+    {% if spotlight %}
+    <div class="mini-highlight">
+      <strong>Latest target</strong>
+      <span>{{ spotlight.role_title }}</span>
+      <small>{{ spotlight.company_name or 'General application' }} · {{ spotlight.score_overall }}%</small>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="stats-grid">
+  <article class="card stat-card"><span>Total Analyses</span><h3>{{ stats.total }}</h3><small>Saved resume-job comparisons</small></article>
+  <article class="card stat-card"><span>Best Score</span><h3>{{ stats.best }}%</h3><small>Top overall fit achieved</small></article>
+  <article class="card stat-card"><span>Average Score</span><h3>{{ stats.avg }}%</h3><small>Across all role attempts</small></article>
+  <article class="card stat-card"><span>Interview Sets</span><h3>{{ stats.interviews }}</h3><small>Generated practice question sets</small></article>
+</section>
+
+<section class="dashboard-grid dashboard-grid-xl">
+  <div class="card chart-card">
+    <div class="card-head"><div><h2>Score Trend</h2><p class="muted">How your recent applications are performing</p></div><span class="pill indigo">Live history</span></div>
+    <canvas id="scoreChart"></canvas>
+  </div>
+  <div class="card chart-card compact">
+    <div class="card-head"><div><h2>Role Mix</h2><p class="muted">Most common categories in your applications</p></div></div>
+    <canvas id="categoryChart"></canvas>
+  </div>
+</section>
+
+<section class="cards-3">
+  <article class="card">
+    <div class="card-head"><h2>Average Score Breakdown</h2></div>
+    <canvas id="breakdownChart"></canvas>
+  </article>
+  <article class="card">
+    <div class="card-head"><h2>Top Missing Skills</h2></div>
+    <ul class="rank-list">
+      {% for skill, count in stats.top_missing %}
+      <li><span>{{ skill }}</span><strong>{{ count }} gap{{ 's' if count != 1 else '' }}</strong></li>
+      {% else %}
+      <li><span>No repeated gaps yet</span><strong>—</strong></li>
+      {% endfor %}
+    </ul>
+  </article>
+  <article class="card insights-card">
+    <div class="card-head"><h2>Quick Insights</h2></div>
+    <ul class="clean-list">
+      <li>Tailor the summary and skills section to the exact job title.</li>
+      <li>Move your strongest project to the top when experience is limited.</li>
+      <li>Add missing tools naturally inside project and internship bullets.</li>
+      <li>Download a report before interviews for fast revision.</li>
+    </ul>
+  </article>
+</section>
+
+<section class="card">
+  <div class="card-head"><div><h2>Recent Analyses</h2><p class="muted">Open any record to review detailed scoring and suggestions</p></div><a href="{{ url_for('history') }}">View all</a></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Role</th><th>Category</th><th>Company</th><th>Score</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for item in analyses %}
+        <tr>
+          <td>{{ item.role_title }}</td>
+          <td><span class="pill indigo">{{ item.role_title|lower|title }}</span></td>
+          <td>{{ item.company_name or '—' }}</td>
+          <td><span class="score-badge">{{ item.score_overall }}%</span></td>
+          <td>{{ item.created_at.strftime('%d %b %Y') }}</td>
+          <td><a href="{{ url_for('analysis_detail', analysis_id=item.id) }}">Open</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">No analyses yet. Create your first one.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const scoreCtx = document.getElementById('scoreChart');
+if (scoreCtx) {
+  new Chart(scoreCtx, {
+    type: 'line',
+    data: {
+      labels: {{ recent_labels|tojson }},
+      datasets: [{ label: 'Overall Score', data: {{ recent_scores|tojson }}, tension: 0.35, borderWidth: 3, fill: false }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+  });
+}
+const categoryCtx = document.getElementById('categoryChart');
+if (categoryCtx) {
+  new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: { labels: {{ category_labels|tojson }}, datasets: [{ data: {{ category_values|tojson }} }] },
+    options: { plugins: { legend: { position: 'bottom' } } }
+  });
+}
+const breakdownCtx = document.getElementById('breakdownChart');
+if (breakdownCtx) {
+  new Chart(breakdownCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Skills', 'Experience', 'Projects', 'Education', 'Keywords'],
+      datasets: [{ data: [{{ score_breakdown.skills }}, {{ score_breakdown.experience }}, {{ score_breakdown.projects }}, {{ score_breakdown.education }}, {{ score_breakdown.keywords }}], borderWidth: 1 }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+  });
+}
+</script>
+{% endblock %}
