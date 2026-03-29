@@ -1,28 +1,39 @@
 import os
 import re
 import json
+import csv
+import pdfplumber
+import docx2txt
+
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-import csv
 from sqlalchemy import func
+
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.units import cm
 from PyPDF2 import PdfReader
-import docx2txt
 
 try:
     from openai import OpenAI
 except Exception:
     OpenAI = None
+
+
+def extract_text_from_pdf(file):
+    text = ""
+    with pdfplumber.open(file) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text() or ""
+    return text.strip()
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_FOLDER = BASE_DIR / 'uploads'
@@ -30,7 +41,11 @@ REPORT_FOLDER = BASE_DIR / 'reports'
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt'}
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-me')
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret")
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+app.config["JWT_COOKIE_SECURE"] = True
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False
 
 def normalize_database_url(url: str) -> str:
     if not url:
@@ -609,6 +624,13 @@ def analyze():
         role_title = request.form.get('role_title', '').strip()
         company_name = request.form.get('company_name', '').strip()
         jd_text = request.form.get('jd_text', '').strip()
+        
+        resume_text = request.form.get('resume_text', '').strip()
+        resume_file = request.files.get('resume_file')
+
+        if resume_file and resume_file.filename.lower().endswith('.pdf'):
+            resume_text = extract_text_from_pdf(resume_file)
+
         upload = request.files.get('resume')
         if not role_title or not jd_text or not upload:
             flash('Role, JD, and resume are required.', 'error')
