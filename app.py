@@ -627,34 +627,48 @@ def analyze():
         role_title = request.form.get('role_title', '').strip()
         company_name = request.form.get('company_name', '').strip()
         jd_text = request.form.get('jd_text', '').strip()
-        
-        resume_text = request.form.get('resume_text', '').strip()
-        resume_file = request.files.get('resume_file')
 
-        if resume_file and resume_file.filename.lower().endswith('.pdf'):
-            resume_text = extract_text_from_pdf(resume_file)
+        upload = request.files.get('resume_file')
 
-        upload = request.files.get('resume')
         if not role_title or not jd_text or not upload:
             flash('Role, JD, and resume are required.', 'error')
             return redirect(url_for('analyze'))
+
         if not allowed_file(upload.filename):
             flash('Please upload PDF, DOCX, or TXT file.', 'error')
             return redirect(url_for('analyze'))
+
         filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{secure_filename(upload.filename)}"
         path = UPLOAD_FOLDER / filename
         upload.save(path)
+
         try:
             resume_text = extract_text(path)
         except Exception as e:
             flash(f'Could not parse file: {e}', 'error')
             return redirect(url_for('analyze'))
+
         if not resume_text.strip():
             flash('Resume text could not be extracted.', 'error')
             return redirect(url_for('analyze'))
+
         scores = score_resume(resume_text, jd_text, role_title)
-        ai_summary = get_ai_summary(role_title, company_name, scores, scores['matched'], scores['missing'], scores['suggestions'], resume_text, jd_text)
-        questions = get_interview_questions(role_title, scores['matched'], scores['missing'], resume_text, jd_text)
+        ai_summary = get_ai_summary(
+            role_title,
+            company_name,
+            scores,
+            scores['matched'],
+            scores['missing'],
+            scores['suggestions']
+        )
+        questions = get_interview_questions(
+            role_title,
+            scores['matched'],
+            scores['missing'],
+            resume_text,
+            jd_text
+        )
+
         analysis = Analysis(
             user_id=current_user.id,
             company_name=company_name,
@@ -676,11 +690,14 @@ def analyze():
             interview_questions=json.dumps(questions),
             ai_summary=ai_summary,
         )
+
         db.session.add(analysis)
         db.session.commit()
         generate_report(analysis)
+
         flash('Analysis completed successfully.', 'success')
         return redirect(url_for('analysis_detail', analysis_id=analysis.id))
+
     return render_template('analyze.html')
 
 

@@ -7,7 +7,7 @@
     <p class="muted">Upload PDF, DOCX, or TXT resume and compare it against a job description.</p>
   </div>
 </section>
-<form class="card form-grid" method="post" enctype="multipart/form-data">
+<form class="card form-grid" method="POST" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
   <div class="field-group full">
     <label>Target role</label>
     <input type="text" name="role_title" placeholder="Software Engineer / Full Stack Developer" required>
@@ -18,7 +18,7 @@
   </div>
   <div class="field-group">
     <label>Resume file</label>
-    <input type="file" name="resume" accept=".pdf,.docx,.txt" required>
+    <input type="file" name="resume_file" accept=".pdf,.docx,.txt" required>
   </div>
   <div class="field-group full">
     <label>Job description</label>
