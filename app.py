@@ -639,17 +639,21 @@ def analyze():
             return redirect(url_for('analyze'))
 
         filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{secure_filename(upload.filename)}"
-        path = UPLOAD_FOLDER / filename
-        upload.save(path)
 
         try:
-            resume_text = extract_text(path)
+            ext = upload.filename.lower()
+            if ext.endswith(".pdf"):
+                resume_text = extract_text_from_pdf(upload)
+            elif ext.endswith(".docx"):
+                import docx2txt
+                resume_text = docx2txt.process(upload)
+            elif ext.endswith(".txt"):
+                resume_text = upload.read().decode("utf-8", errors="ignore")
+            else:
+                flash('Please upload PDF, DOCX, or TXT file.', 'error')
+                return redirect(url_for('analyze'))
         except Exception as e:
             flash(f'Could not parse file: {e}', 'error')
-            return redirect(url_for('analyze'))
-
-        if not resume_text.strip():
-            flash('Resume text could not be extracted.', 'error')
             return redirect(url_for('analyze'))
 
         scores = score_resume(resume_text, jd_text, role_title)
