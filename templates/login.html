@@ -42,7 +42,7 @@
           <p>Access your dashboard to discover insights, train staff, and optimize skills.</p>
         </div>
 
-        <form class="auth-modern-form" method="post">
+        <form class="auth-modern-form" method="POST" action="{{ url_for('login') }}">
           <div class="field-block">
             <label>Email Address</label>
             <input type="email" name="email" placeholder="name@company.com" required>
