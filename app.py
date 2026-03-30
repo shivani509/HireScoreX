@@ -627,7 +627,6 @@ def analyze():
         role_title = request.form.get('role_title', '').strip()
         company_name = request.form.get('company_name', '').strip()
         jd_text = request.form.get('jd_text', '').strip()
-
         upload = request.files.get('resume_file')
 
         if not role_title or not jd_text or not upload:
@@ -641,22 +640,28 @@ def analyze():
         filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{secure_filename(upload.filename)}"
 
         try:
-            ext = upload.filename.lower()
-            if ext.endswith(".pdf"):
+            lower_name = upload.filename.lower()
+
+            if lower_name.endswith('.pdf'):
                 resume_text = extract_text_from_pdf(upload)
-            elif ext.endswith(".docx"):
-                import docx2txt
+            elif lower_name.endswith('.docx'):
                 resume_text = docx2txt.process(upload)
-            elif ext.endswith(".txt"):
-                resume_text = upload.read().decode("utf-8", errors="ignore")
+            elif lower_name.endswith('.txt'):
+                resume_text = upload.read().decode('utf-8', errors='ignore')
             else:
-                flash('Please upload PDF, DOCX, or TXT file.', 'error')
+                flash('Unsupported file type.', 'error')
                 return redirect(url_for('analyze'))
+
         except Exception as e:
             flash(f'Could not parse file: {e}', 'error')
             return redirect(url_for('analyze'))
 
+        if not resume_text.strip():
+            flash('Resume text could not be extracted.', 'error')
+            return redirect(url_for('analyze'))
+
         scores = score_resume(resume_text, jd_text, role_title)
+
         ai_summary = get_ai_summary(
             role_title,
             company_name,
@@ -665,6 +670,7 @@ def analyze():
             scores['missing'],
             scores['suggestions']
         )
+
         questions = get_interview_questions(
             role_title,
             scores['matched'],
@@ -697,7 +703,6 @@ def analyze():
 
         db.session.add(analysis)
         db.session.commit()
-        generate_report(analysis)
 
         flash('Analysis completed successfully.', 'success')
         return redirect(url_for('analysis_detail', analysis_id=analysis.id))
@@ -916,7 +921,7 @@ def seed_demo_data():
         )
         db.session.add(analysis)
         db.session.commit()
-        generate_report(analysis)
+        #generate_report(analysis)
 
 
 @app.context_processor
