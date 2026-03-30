@@ -51,8 +51,10 @@ app.config["JWT_COOKIE_CSRF_PROTECT"] = False
 def normalize_database_url(url: str) -> str:
     if not url:
         return f"sqlite:///{BASE_DIR / 'hirescorex.db'}"
-    if url.startswith('postgres://'):
-        return url.replace('postgres://', 'postgresql://', 1)
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+psycopg://", 1)
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
     return url
 
 db_url = normalize_database_url(os.getenv('DATABASE_URL', ''))
