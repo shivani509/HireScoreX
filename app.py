@@ -911,5 +911,6 @@ if __name__ == '__main__':
         seed_demo_data()
     app.run(debug=True)
 
-with app.app_context():
+@app.before_request
+def create_tables():
     db.create_all()
